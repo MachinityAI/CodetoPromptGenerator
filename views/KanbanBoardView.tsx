@@ -16,7 +16,7 @@ import { useUserStoryStore } from '@/stores/useUserStoryStore';
 import { useUserStoryService } from '@/services/userStoryServiceHooks'; 
 import { format, isPast, isToday, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
@@ -117,7 +117,7 @@ interface TaskCardProps {
   onDelete: () => void;
   onManageStories: () => void;
   isDragging: boolean;
-  dragHandleProps: any;
+  dragHandleProps: DraggableProvidedDragHandleProps | null | undefined;
 }
 
 const TaskCard = React.memo(

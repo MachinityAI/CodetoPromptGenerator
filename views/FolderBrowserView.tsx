@@ -97,8 +97,9 @@ export default function FolderBrowserView({
       const raw = await fetchJson(`${API}/api/select_drives`);
       setDrives(normaliseDrives(raw));
       setError(null);
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to load drives');
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Failed to load drives';
+      setError(errorMessage);
       setDrives([]);
     } finally {
       setLoading(false);
@@ -116,8 +117,9 @@ export default function FolderBrowserView({
       setParentPath(j.parent_path ?? null);
       setFolders(j.folders ?? []);
       setError(null);
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to browse folder');
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Failed to browse folder';
+      setError(errorMessage);
       setFolders([]);
       /* ensure `path` is still a defined string so
          render logic never crashes */

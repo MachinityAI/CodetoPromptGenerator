@@ -52,13 +52,13 @@ const ActorListView: React.FC = () => {
 
   // Filter actors based on search
   const filteredActors = useMemo(() => {
-    return actors.filter((actor: { name: string; role: string; permissions: any[]; goals: any[]; }) => {
+    return actors.filter((actor) => {
       const lowerSearchTerm = searchTerm.toLowerCase();
       return (
         actor.name.toLowerCase().includes(lowerSearchTerm) ||
         actor.role.toLowerCase().includes(lowerSearchTerm) ||
-        (actor.permissions && actor.permissions.some((p: string) => p.toLowerCase().includes(lowerSearchTerm))) ||
-        (actor.goals && actor.goals.some((g: string) => g.toLowerCase().includes(lowerSearchTerm)))
+        (actor.permissions && actor.permissions.some((p) => p.toLowerCase().includes(lowerSearchTerm))) ||
+        (actor.goals && actor.goals.some((g) => g.toLowerCase().includes(lowerSearchTerm)))
       );
     });
   }, [actors, searchTerm]);
@@ -187,7 +187,7 @@ const ActorListView: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-4 py-1">
-              {filteredActors.map((actor: { id: React.Key | null | undefined; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; role: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; permissions: any[]; goals: any[]; }) => (
+              {filteredActors.map((actor) => (
                 <div
                   key={actor.id}
                   className="group relative bg-[rgba(var(--color-bg-secondary),0.3)] hover:bg-[rgba(var(--color-bg-secondary),0.5)] border border-[rgba(var(--color-border),0.4)] hover:border-[rgba(var(--color-border),0.6)] rounded-lg p-4 transition-all duration-200 ease-out hover:shadow-sm"
@@ -226,7 +226,7 @@ const ActorListView: React.FC = () => {
                             <TooltipContent side="top">
                               <p className="text-xs font-medium mb-1">Permissions:</p>
                               <ul className="list-disc list-inside text-xs">
-                                {actor.permissions.map((p: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined, i: React.Key | null | undefined) => <li key={i}>{p}</li>)}
+                                {actor.permissions.map((p, i) => <li key={i}>{p}</li>)}
                               </ul>
                             </TooltipContent>
                           </Tooltip>
@@ -247,7 +247,7 @@ const ActorListView: React.FC = () => {
                             <TooltipContent side="top">
                               <p className="text-xs font-medium mb-1">Goals:</p>
                               <ul className="list-disc list-inside text-xs">
-                                {actor.goals.map((g: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined, i: React.Key | null | undefined) => <li key={i}>{g}</li>)}
+                                {actor.goals.map((g, i) => <li key={i}>{g}</li>)}
                               </ul>
                             </TooltipContent>
                           </Tooltip>

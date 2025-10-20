@@ -83,8 +83,8 @@ export default function StunningFolderBrowserView({
       if (response.ok) {
         const data = await response.json();
         const drives = Array.isArray(data) ? data : data.drives || [];
-        const normalizedDrives = drives.map((drive: any) => 
-          typeof drive === 'string' 
+        const normalizedDrives = drives.map((drive: string | FolderItem) =>
+          typeof drive === 'string'
             ? { name: drive, path: drive }
             : { name: drive.name || drive.path, path: drive.path || drive.name }
         );
