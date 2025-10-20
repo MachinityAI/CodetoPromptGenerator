@@ -12,7 +12,7 @@ export async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {},
   // Optional function to call on specific error codes BEFORE setting global error
-  handleError?: (status: number, errorData: any) => boolean | void
+  handleError?: (status: number, errorData: unknown) => boolean | void
 ): Promise<T | null> {
   const { setError, clearError } = useAppStore.getState();
   const defaultHeaders: HeadersInit = {

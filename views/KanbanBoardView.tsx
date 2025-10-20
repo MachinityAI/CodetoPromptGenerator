@@ -16,7 +16,7 @@ import { useUserStoryStore } from '@/stores/useUserStoryStore';
 import { useUserStoryService } from '@/services/userStoryServiceHooks'; 
 import { format, isPast, isToday, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
@@ -117,7 +117,7 @@ interface TaskCardProps {
   onDelete: () => void;
   onManageStories: () => void;
   isDragging: boolean;
-  dragHandleProps: any;
+  dragHandleProps: DraggableProvidedDragHandleProps | null | undefined;
 }
 
 const TaskCard = React.memo(
@@ -335,7 +335,7 @@ interface ColumnProps {
   isSaving: boolean;
 }
 
-const Column: React.FC<ColumnProps> = ({
+const Column = React.memo<React.FC<ColumnProps>>(({
   status,
   items,
   onAddTask,
@@ -523,7 +523,7 @@ const Column: React.FC<ColumnProps> = ({
       </Droppable>
     </div>
   );
-};
+});
 
 /* =================================================================== */
 /* Main Kanban Board Component                                         */
