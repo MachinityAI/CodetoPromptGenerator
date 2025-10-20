@@ -335,7 +335,7 @@ interface ColumnProps {
   isSaving: boolean;
 }
 
-const Column: React.FC<ColumnProps> = ({
+const Column = React.memo<React.FC<ColumnProps>>(({
   status,
   items,
   onAddTask,
@@ -523,7 +523,7 @@ const Column: React.FC<ColumnProps> = ({
       </Droppable>
     </div>
   );
-};
+});
 
 /* =================================================================== */
 /* Main Kanban Board Component                                         */

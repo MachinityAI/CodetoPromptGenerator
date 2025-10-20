@@ -55,12 +55,18 @@ export default function StunningFolderBrowserView({
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
 
-  // Breadcrumb navigation
-  const pathParts = path ? path.split(/[/\\]/).filter(Boolean) : [];
-  
-  // Filter folders based on search
-  const filtered = folders.filter(f =>
-    f.name.toLowerCase().includes(search.toLowerCase())
+  // Breadcrumb navigation - memoized for performance
+  const pathParts = React.useMemo(() =>
+    path ? path.split(/[/\\]/).filter(Boolean) : [],
+    [path]
+  );
+
+  // Filter folders based on search - memoized for performance
+  const filtered = React.useMemo(() =>
+    folders.filter(f =>
+      f.name.toLowerCase().includes(search.toLowerCase())
+    ),
+    [folders, search]
   );
 
   // API base URL
@@ -152,8 +158,7 @@ export default function StunningFolderBrowserView({
       // Relative or other path
       newPath = selectedParts.join(separator);
     }
-    
-    console.log('Breadcrumb navigation:', { index, selectedParts, originalPath: path, newPath });
+
     browse(newPath);
   };
 

@@ -130,9 +130,12 @@ export default function FolderBrowserView({
   }
 
   /* -------------- derived --------------- */
-  // Filter folders based on the search state
-  const filtered = folders.filter(f =>
-    f.name.toLowerCase().includes(search.toLowerCase())
+  // Filter folders based on the search state - memoized for performance
+  const filtered = React.useMemo(() =>
+    folders.filter(f =>
+      f.name.toLowerCase().includes(search.toLowerCase())
+    ),
+    [folders, search]
   );
 
   /* --------------- render --------------- */

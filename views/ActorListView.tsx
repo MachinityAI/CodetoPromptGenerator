@@ -112,9 +112,10 @@ const ActorListView: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="mb-4">
+    <TooltipProvider>
+      <div className="h-full flex flex-col">
+        {/* Header */}
+        <div className="mb-4">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold text-[rgb(var(--color-text-primary))] flex items-center gap-2">
@@ -146,16 +147,14 @@ const ActorListView: React.FC = () => {
               className="pl-9 h-9 bg-[rgba(var(--color-bg-secondary),0.3)] border-[rgba(var(--color-border),0.4)] focus:border-[rgba(var(--color-primary),0.5)]"
             />
           </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" className="h-9 w-9" onClick={loadActors}>
-                  <RefreshCw size={16} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Refresh actors</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" className="h-9 w-9" onClick={loadActors}>
+                <RefreshCw size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Refresh actors</TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Active filters display */}
@@ -212,91 +211,83 @@ const ActorListView: React.FC = () => {
 
                     <div className="flex flex-wrap gap-2 mt-3">
                       {actor.permissions && actor.permissions.length > 0 && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge
-                                variant="outline"
-                                className="h-5 px-1.5 text-[10px] font-medium bg-[rgba(var(--color-primary),0.1)] text-[rgb(var(--color-primary))] border-[rgba(var(--color-primary),0.3)] cursor-pointer"
-                              >
-                                <KeyRound size={10} className="mr-0.5" />
-                                {actor.permissions.length} Permissions
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                              <p className="text-xs font-medium mb-1">Permissions:</p>
-                              <ul className="list-disc list-inside text-xs">
-                                {actor.permissions.map((p, i) => <li key={i}>{p}</li>)}
-                              </ul>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge
+                              variant="outline"
+                              className="h-5 px-1.5 text-[10px] font-medium bg-[rgba(var(--color-primary),0.1)] text-[rgb(var(--color-primary))] border-[rgba(var(--color-primary),0.3)] cursor-pointer"
+                            >
+                              <KeyRound size={10} className="mr-0.5" />
+                              {actor.permissions.length} Permissions
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p className="text-xs font-medium mb-1">Permissions:</p>
+                            <ul className="list-disc list-inside text-xs">
+                              {actor.permissions.map((p, i) => <li key={i}>{p}</li>)}
+                            </ul>
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                       {actor.goals && actor.goals.length > 0 && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge
-                                variant="outline"
-                                className="h-5 px-1.5 text-[10px] font-medium bg-[rgba(var(--color-secondary),0.1)] text-[rgb(var(--color-secondary))] border-[rgba(var(--color-secondary),0.3)] cursor-pointer"
-                              >
-                                <Target size={10} className="mr-0.5" />
-                                {actor.goals.length} Goals
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                              <p className="text-xs font-medium mb-1">Goals:</p>
-                              <ul className="list-disc list-inside text-xs">
-                                {actor.goals.map((g, i) => <li key={i}>{g}</li>)}
-                              </ul>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge
+                              variant="outline"
+                              className="h-5 px-1.5 text-[10px] font-medium bg-[rgba(var(--color-secondary),0.1)] text-[rgb(var(--color-secondary))] border-[rgba(var(--color-secondary),0.3)] cursor-pointer"
+                            >
+                              <Target size={10} className="mr-0.5" />
+                              {actor.goals.length} Goals
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p className="text-xs font-medium mb-1">Goals:</p>
+                            <ul className="list-disc list-inside text-xs">
+                              {actor.goals.map((g, i) => <li key={i}>{g}</li>)}
+                            </ul>
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                     </div>
                   </div>
 
                   {/* Quick actions on hover */}
                   <div className="absolute -right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7 bg-[rgb(var(--color-bg-primary))] border-[rgba(var(--color-border),0.5)] hover:border-[rgba(var(--color-primary),0.5)] hover:text-[rgb(var(--color-primary))]"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditActor(actor);
-                            }}
-                          >
-                            <Edit2 size={12} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">Edit</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-7 w-7 bg-[rgb(var(--color-bg-primary))] border-[rgba(var(--color-border),0.5)] hover:border-[rgba(var(--color-primary),0.5)] hover:text-[rgb(var(--color-primary))]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditActor(actor);
+                          }}
+                        >
+                          <Edit2 size={12} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">Edit</TooltipContent>
+                    </Tooltip>
 
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7 bg-[rgb(var(--color-bg-primary))] border-[rgba(var(--color-border),0.5)] hover:border-rose-500/50 hover:text-rose-400"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (typeof actor.id === 'number') {
-                                handleDeleteActor(actor.id);
-                              }
-                            }}
-                          >
-                            <Trash2 size={12} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">Delete</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-7 w-7 bg-[rgb(var(--color-bg-primary))] border-[rgba(var(--color-border),0.5)] hover:border-rose-500/50 hover:text-rose-400"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (typeof actor.id === 'number') {
+                              handleDeleteActor(actor.id);
+                            }
+                          }}
+                        >
+                          <Trash2 size={12} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">Delete</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               ))}
@@ -316,7 +307,8 @@ const ActorListView: React.FC = () => {
         onSave={handleSaveActor}
         isSaving={isSaving}
       />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };
 
