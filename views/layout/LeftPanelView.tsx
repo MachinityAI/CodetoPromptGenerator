@@ -11,7 +11,6 @@ import {
   ChevronsUp,
   LayoutGrid,
   Filter,
-  Users, // NEW icon for Actors
 } from "lucide-react";
 import {
   Tabs,
@@ -35,7 +34,6 @@ import SelectedFilesListView from "@/views/SelectedFilesListView";
 import RefinedSelectionGroupsView from "@/views/RefinedSelectionGroupsView";
 import RefinedExclusionsManagerView from "@/views/RefinedExclusionsManagerView";
 import RefinedLocalExclusionsManagerView from "@/views/RefinedLocalExclusionsManagerView";
-import ActorListView from "@/views/ActorListView";
 
 import {
   applyWildcardFilter,
@@ -45,8 +43,8 @@ import {
 import type { FileNode } from "@/types";
 
 interface LeftPanelViewProps {
-  activeTab: "files" | "options" | "actors";
-  setActiveTab: (tab: "files" | "options" | "actors") => void;
+  activeTab: "files" | "options";
+  setActiveTab: (tab: "files" | "options") => void;
   projectPath: string;
   isLoadingTree: boolean;
   fileSearchTerm: string;
@@ -102,9 +100,9 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
       className="space-y-6"
     >
       {/* Enhanced Tab Navigation with dynamic glows */}
-      <TabsList className="grid grid-cols-3 p-1.5 bg-[rgba(var(--color-bg-secondary),0.7)] backdrop-blur-xl border border-[rgba(var(--color-border),0.5)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-        <TabsTrigger 
-          value="files" 
+      <TabsList className="grid grid-cols-2 p-1.5 bg-[rgba(var(--color-bg-secondary),0.7)] backdrop-blur-xl border border-[rgba(var(--color-border),0.5)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+        <TabsTrigger
+          value="files"
           className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-primary),0.2)] data-[state=active]:to-[rgba(var(--color-primary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-primary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-primary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
         >
           <div className="p-1 rounded-md bg-[rgba(var(--color-primary),0.1)] mr-2">
@@ -120,15 +118,6 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
             <Settings size={16} className="text-[rgb(var(--color-secondary))]" />
           </div>
           <span className="font-medium">Options</span>
-        </TabsTrigger>
-        <TabsTrigger
-          value="actors"
-          className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-accent-2),0.2)] data-[state=active]:to-[rgba(var(--color-accent-2),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-accent-2),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-accent-2),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
-        >
-          <div className="p-1 rounded-md bg-[rgba(var(--color-accent-2),0.1)] mr-2">
-            <Users size={16} className="text-[rgb(var(--color-accent-2))]" />
-          </div>
-          <span className="font-medium">Actors</span>
         </TabsTrigger>
       </TabsList>
 
@@ -320,11 +309,6 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
       <TabsContent value="options" className="mt-6 space-y-8 animate-fade-in">
         <RefinedExclusionsManagerView />
         {projectPath && <RefinedLocalExclusionsManagerView />}
-      </TabsContent>
-
-      {/* ACTORS TAB */}
-      <TabsContent value="actors" className="mt-6 h-full flex flex-col animate-fade-in">
-        <ActorListView />
       </TabsContent>
     </Tabs>
   );

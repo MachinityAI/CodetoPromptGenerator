@@ -18,7 +18,6 @@ import {
   import { usePromptService } from "@/services/promptServiceHooks";
   import { useExclusionService } from "@/services/exclusionServiceHooks";
   import { useAutoSelectService } from "@/services/autoSelectServiceHooks";
-  import { useActorWizardService } from "@/services/actorWizardServiceHooks";
 
   import {
     applyExtensionFilter,
@@ -62,11 +61,10 @@ import {
     const { fetchMetaPromptList } = usePromptService();
     const { fetchGlobalExclusions, fetchLocalExclusions } = useExclusionService();
     const { autoSelect, isSelecting } = useAutoSelectService();
-    const { generateActors, isGenerating } = useActorWizardService();
 
     // --- Refs & Local UI State ---
     const treeRef = useRef<FileTreeViewHandle>(null);
-    const [activeTab, setActiveTab] = useState<"files" | "options" | "actors">(
+    const [activeTab, setActiveTab] = useState<"files" | "options">(
       "files",
     );
     // showSettings and setShowSettings are removed, managed by useAppStore
@@ -198,8 +196,6 @@ import {
       // Setters & Handlers
       handlePathSelected,
       autoSelect,
-      generateActors,
-      isGeneratingActors: isGenerating,
       openSettingsModal, // Expose store action
       saveApiKey,
       setApiKeyDraft,

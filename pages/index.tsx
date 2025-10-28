@@ -45,8 +45,6 @@ export default function Home() {
     saveApiKey,
     handlePathSelected,
     autoSelect,
-    generateActors,
-    isGeneratingActors,
     setActiveTab,
     setFileSearchTerm,
     handleRefresh,
@@ -71,9 +69,7 @@ export default function Home() {
       <HeaderView
         onShowSettings={openSettingsModal} // Pass the action to open settings modal
         onAutoSelect={autoSelect}
-        onGenerateActors={generateActors}
         isSelecting={isSelecting}
-        isGeneratingActors={isGeneratingActors}
         projectPath={projectPath}
       />
 

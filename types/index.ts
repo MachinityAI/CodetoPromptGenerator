@@ -55,20 +55,3 @@ export interface AutoSelectRequest {
 }
 
 export type AutoSelectResponse = string[];            // list of *relative* paths
-
-/* █████  ACTOR  ██████████████████████████████████████████████████████ */
-export interface Actor {
-  id: number;
-  name: string;
-  role: string;
-  permissions?: string[];
-  goals?: string[];
-}
-
-export const ActorSchema = z.object({
-  id: z.number().int().nonnegative(),
-  name: z.string().min(1).max(100),
-  role: z.string().min(1),
-  permissions: z.array(z.string()).optional(),
-  goals: z.array(z.string()).optional(),
-});

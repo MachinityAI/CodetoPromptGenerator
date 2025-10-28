@@ -9,7 +9,7 @@ import type { FileTreeViewHandle } from "@/views/FileTreeView";
  */
 export function useUIState() {
   // Local UI state
-  const [activeTab, setActiveTab] = useState<"files" | "options" | "actors">("files");
+  const [activeTab, setActiveTab] = useState<"files" | "options">("files");
   
   // Refs
   const treeRef = useRef<FileTreeViewHandle>(null);
