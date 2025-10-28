@@ -7,7 +7,10 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { glob } from 'glob';
-import ignore from 'ignore';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const ignoreFactory = require('ignore');
 
 interface SmartSelectionArgs {
   projectPath: string;
@@ -19,7 +22,7 @@ interface SmartSelectionArgs {
  * Get all files in project respecting gitignore
  */
 async function getAllFiles(projectPath: string): Promise<string[]> {
-  const ig = ignore();
+  const ig = ignoreFactory();
 
   // Load .gitignore
   try {

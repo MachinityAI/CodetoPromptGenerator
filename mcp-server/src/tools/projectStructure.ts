@@ -6,7 +6,11 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import ignore from 'ignore';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const ignoreFactory = require('ignore');
+type Ignore = ReturnType<typeof ignoreFactory>;
 
 interface ProjectStructureArgs {
   path: string;
@@ -26,8 +30,8 @@ interface FileNode {
 /**
  * Load .gitignore patterns
  */
-async function loadGitignore(projectPath: string): Promise<ReturnType<typeof ignore>> {
-  const ig = ignore();
+async function loadGitignore(projectPath: string): Promise<Ignore> {
+  const ig = ignoreFactory();
   const gitignorePath = path.join(projectPath, '.gitignore');
 
   try {
@@ -59,7 +63,7 @@ async function loadGitignore(projectPath: string): Promise<ReturnType<typeof ign
 async function buildFileTree(
   dirPath: string,
   relativePath: string,
-  ig: ReturnType<typeof ignore>,
+  ig: Ignore,
   currentDepth: number,
   maxDepth: number,
   includeHidden: boolean

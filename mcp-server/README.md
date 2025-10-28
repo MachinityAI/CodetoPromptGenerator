@@ -44,7 +44,11 @@ Resources are read-only data sources:
 
 1. **`project://structure?path=/path/to/project`** - Project structure
 2. **`project://file/{absolute_path}`** - Individual file contents
-3. **`project://context/{hash}`** - Pre-computed context (planned)
+3. **`project://context?path=/path&task=description`** - Cached comprehensive context
+   - Combines project structure, git context, and smart file selection
+   - In-memory caching with 5-minute TTL
+   - Automatically includes relevant files when task description provided
+   - Perfect for quickly getting full project context
 
 ## Installation
 
@@ -109,6 +113,8 @@ Once configured, you can ask Claude:
 "Use get_git_context to show me what changed in the last 10 commits"
 
 "Use analyze_code_graph to show me the dependencies between these files"
+
+"Read the project://context resource to get comprehensive context about my project"
 ```
 
 ### Example Conversation
