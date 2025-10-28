@@ -12,13 +12,11 @@ import {
   import { useProjectStore } from "@/stores/useProjectStore";
   import { usePromptStore } from "@/stores/usePromptStore";
   import { useExclusionStore } from "@/stores/useExclusionStore";
-  import { useTodoStore } from "@/stores/useTodoStore";
   import { useSettingsStore } from "@/stores/useSettingStore";
 
   import { useProjectService } from "@/services/projectServiceHooks";
   import { usePromptService } from "@/services/promptServiceHooks";
   import { useExclusionService } from "@/services/exclusionServiceHooks";
-  import { useTodoService } from "@/services/todoServiceHooks";
   import { useAutoSelectService } from "@/services/autoSelectServiceHooks";
   import { useActorWizardService } from "@/services/actorWizardServiceHooks";
 
@@ -57,20 +55,18 @@ import {
     const localExclusions = useExclusionStore((s) => s.localExclusions);
     const extensionFilters = useExclusionStore((s) => s.extensionFilters);
 
-    const todos = useTodoStore((s) => s.todos);
     const setOpenrouterApiKey = useSettingsStore((s) => s.setOpenrouterApiKey);
 
     // --- Services ---
     const { loadProjectTree, loadSelectedFileContents } = useProjectService();
     const { fetchMetaPromptList } = usePromptService();
     const { fetchGlobalExclusions, fetchLocalExclusions } = useExclusionService();
-    const { loadTodos } = useTodoService();
     const { autoSelect, isSelecting } = useAutoSelectService();
     const { generateActors, isGenerating } = useActorWizardService();
 
     // --- Refs & Local UI State ---
     const treeRef = useRef<FileTreeViewHandle>(null);
-    const [activeTab, setActiveTab] = useState<"files" | "options" | "tasks" | "actors">( 
+    const [activeTab, setActiveTab] = useState<"files" | "options" | "actors">(
       "files",
     );
     // showSettings and setShowSettings are removed, managed by useAppStore
@@ -95,7 +91,6 @@ import {
     useEffect(() => {
       if (projectPath) {
         loadProjectTree();
-        loadTodos();
         fetchLocalExclusions();
       } else {
         useProjectStore.setState({
@@ -103,10 +98,9 @@ import {
           selectedFilePaths: [],
           filesData: [],
         });
-        useTodoStore.setState({ todos: [] });
         useExclusionStore.setState({ localExclusions: [] });
       }
-    }, [projectPath, loadProjectTree, loadTodos, fetchLocalExclusions]);
+    }, [projectPath, loadProjectTree, fetchLocalExclusions]);
 
     useEffect(() => {
       if (projectPath && selectedFilePaths.length) {
@@ -192,11 +186,10 @@ import {
       isLoadingTree,
       isSelecting,
       activeTab,
-      filteredTree, 
+      filteredTree,
       selectedFilePaths,
       fileSearchTerm,
-      localExclusions, 
-      todos, 
+      localExclusions,
       hasContent,
       selectedFileCount,
       totalTokens,
@@ -218,6 +211,6 @@ import {
       setSelectedFilePaths,
       // Refs
       treeRef,
-      fileTree, 
+      fileTree,
     };
   }

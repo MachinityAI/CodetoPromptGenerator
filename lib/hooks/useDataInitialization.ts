@@ -2,10 +2,8 @@
 import { useEffect, useState } from "react";
 import { usePromptService } from "@/services/promptServiceHooks";
 import { useExclusionService } from "@/services/exclusionServiceHooks";
-import { useTodoService } from "@/services/todoServiceHooks";
 import { useSettingsStore } from "@/stores/useSettingStore";
 import { useProjectStore } from "@/stores/useProjectStore";
-import { useTodoStore } from "@/stores/useTodoStore";
 import { useExclusionStore } from "@/stores/useExclusionStore";
 
 const LS_KEY_OR = "openrouterApiKey";
@@ -23,7 +21,6 @@ export function useDataInitialization() {
   // Services
   const { fetchMetaPromptList } = usePromptService();
   const { fetchGlobalExclusions, fetchLocalExclusions } = useExclusionService();
-  const { loadTodos } = useTodoService();
 
   // Client-side initialization
   useEffect(() => {
@@ -44,13 +41,11 @@ export function useDataInitialization() {
   // Project-specific data loading
   useEffect(() => {
     if (projectPath) {
-      loadTodos();
       fetchLocalExclusions();
     } else {
-      useTodoStore.setState({ todos: [] });
       useExclusionStore.setState({ localExclusions: [] });
     }
-  }, [projectPath, loadTodos, fetchLocalExclusions]);
+  }, [projectPath, fetchLocalExclusions]);
 
   return {
     isClient,

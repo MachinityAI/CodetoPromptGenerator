@@ -3,7 +3,6 @@ import React, { useMemo } from "react";
 import {
   FileCode,
   Settings,
-  ListChecks,
   Search,
   RefreshCw,
   CheckSquare,
@@ -11,10 +10,7 @@ import {
   ChevronsDown,
   ChevronsUp,
   LayoutGrid,
-  ClipboardList, // New icon for Kanban
-  Layers,
   Filter,
-  BookOpen, // New icon for User Stories
   Users, // NEW icon for Actors
 } from "lucide-react";
 import {
@@ -39,10 +35,7 @@ import SelectedFilesListView from "@/views/SelectedFilesListView";
 import RefinedSelectionGroupsView from "@/views/RefinedSelectionGroupsView";
 import RefinedExclusionsManagerView from "@/views/RefinedExclusionsManagerView";
 import RefinedLocalExclusionsManagerView from "@/views/RefinedLocalExclusionsManagerView";
-import KanbanBoardView from "@/views/KanbanBoardView";
-import TodoListView from "@/views/TodoListView";
-import UserStoryListView from "@/views/UserStoryListView";
-import ActorListView from "@/views/ActorListView"; // Import the new ActorListView
+import ActorListView from "@/views/ActorListView";
 
 import {
   applyWildcardFilter,
@@ -52,8 +45,8 @@ import {
 import type { FileNode } from "@/types";
 
 interface LeftPanelViewProps {
-  activeTab: "files" | "options" | "tasks" | "actors"; // ADDED "actors"
-  setActiveTab: (tab: "files" | "options" | "tasks" | "actors") => void; // ADDED "actors"
+  activeTab: "files" | "options" | "actors";
+  setActiveTab: (tab: "files" | "options" | "actors") => void;
   projectPath: string;
   isLoadingTree: boolean;
   fileSearchTerm: string;
@@ -109,7 +102,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
       className="space-y-6"
     >
       {/* Enhanced Tab Navigation with dynamic glows */}
-      <TabsList className="grid grid-cols-4 p-1.5 bg-[rgba(var(--color-bg-secondary),0.7)] backdrop-blur-xl border border-[rgba(var(--color-border),0.5)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+      <TabsList className="grid grid-cols-3 p-1.5 bg-[rgba(var(--color-bg-secondary),0.7)] backdrop-blur-xl border border-[rgba(var(--color-border),0.5)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
         <TabsTrigger 
           value="files" 
           className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-primary),0.2)] data-[state=active]:to-[rgba(var(--color-primary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-primary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-primary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
@@ -119,7 +112,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
           </div>
           <span className="font-medium">Files</span>
         </TabsTrigger>
-        <TabsTrigger 
+        <TabsTrigger
           value="options"
           className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-secondary),0.2)] data-[state=active]:to-[rgba(var(--color-secondary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-secondary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-secondary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
         >
@@ -128,17 +121,8 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
           </div>
           <span className="font-medium">Options</span>
         </TabsTrigger>
-        <TabsTrigger 
-          value="tasks"
-          className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-tertiary),0.2)] data-[state=active]:to-[rgba(var(--color-tertiary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-tertiary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-tertiary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
-        >
-          <div className="p-1 rounded-md bg-[rgba(var(--color-tertiary),0.1)] mr-2">
-            <ListChecks size={16} className="text-[rgb(var(--color-tertiary))]" />
-          </div>
-          <span className="font-medium">Tasks</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="actors" // NEW Tab
+        <TabsTrigger
+          value="actors"
           className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-accent-2),0.2)] data-[state=active]:to-[rgba(var(--color-accent-2),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-accent-2),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-accent-2),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
         >
           <div className="p-1 rounded-md bg-[rgba(var(--color-accent-2),0.1)] mr-2">
@@ -338,53 +322,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
         {projectPath && <RefinedLocalExclusionsManagerView />}
       </TabsContent>
 
-      {/* TASKS TAB */}
-      {/* Nested Tabs for Kanban and User Stories */}
-      <TabsContent value="tasks" className="mt-6 h-full flex flex-col animate-fade-in">
-        {projectPath ? (
-          <Tabs defaultValue="kanban-board" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-2 p-1.5 bg-[rgba(var(--color-bg-secondary),0.7)] backdrop-blur-xl border border-[rgba(var(--color-border),0.5)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] mb-4">
-              <TabsTrigger 
-                value="kanban-board" 
-                className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-primary),0.2)] data-[state=active]:to-[rgba(var(--color-primary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-primary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-primary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
-              >
-                <div className="p-1 rounded-md bg-[rgba(var(--color-primary),0.1)] mr-2">
-                  <ClipboardList size={16} className="text-[rgb(var(--color-primary))]" />
-                </div>
-                <span className="font-medium">Kanban Board</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="user-stories" 
-                className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-tertiary),0.2)] data-[state=active]:to-[rgba(var(--color-tertiary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-tertiary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-tertiary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
-              >
-                <div className="p-1 rounded-md bg-[rgba(var(--color-tertiary),0.1)] mr-2">
-                  <BookOpen size={16} className="text-[rgb(var(--color-tertiary))]" />
-                </div>
-                <span className="font-medium">User Stories</span>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="kanban-board" className="flex-1 pt-0 mt-0">
-              <KanbanBoardView />
-            </TabsContent>
-            <TabsContent value="user-stories" className="flex-1 pt-0 mt-0">
-              <UserStoryListView />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          // Moved to a common 'no project selected' message within the nested tabs
-          <div className="p-16 border border-dashed border-[rgba(var(--color-border),0.5)] rounded-xl bg-[rgba(var(--color-bg-secondary),0.3)] backdrop-blur-sm text-center flex flex-col items-center text-[rgb(var(--color-text-muted))] h-full justify-center">
-            <div className="w-16 h-16 rounded-full bg-[rgba(var(--color-bg-tertiary),0.7)] flex items-center justify-center mb-4 border border-[rgba(var(--color-border),0.3)]">
-              <Layers size={36} className="opacity-40 text-[rgb(var(--color-text-muted))]" />
-            </div>
-            <p className="text-lg font-medium mb-2 text-[rgb(var(--color-text-secondary))]">No Project Selected</p>
-            <p className="max-w-md text-sm">Select a project using the folder picker at the top to manage your tasks and user stories.</p>
-          </div>
-          
-        )}
-      </TabsContent>
-
-      {/* ACTORS TAB (NEW) */}
+      {/* ACTORS TAB */}
       <TabsContent value="actors" className="mt-6 h-full flex flex-col animate-fade-in">
         <ActorListView />
       </TabsContent>
