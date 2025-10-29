@@ -42,9 +42,14 @@ import {
 } from "@/lib/fileFilters";
 import type { FileNode } from "@/types";
 
+type LeftPanelTab = "files" | "options";
+
+const isLeftPanelTab = (value: string): value is LeftPanelTab =>
+  value === "files" || value === "options";
+
 interface LeftPanelViewProps {
-  activeTab: "files" | "options";
-  setActiveTab: (tab: "files" | "options") => void;
+  activeTab: LeftPanelTab;
+  setActiveTab: (tab: LeftPanelTab) => void;
   projectPath: string;
   isLoadingTree: boolean;
   fileSearchTerm: string;
@@ -96,7 +101,11 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
   return (
     <Tabs
       value={activeTab}
-      onValueChange={(v) => setActiveTab(v as any)}
+      onValueChange={(value) => {
+        if (isLeftPanelTab(value)) {
+          setActiveTab(value);
+        }
+      }}
       className="space-y-6"
     >
       {/* Enhanced Tab Navigation with dynamic glows */}
@@ -106,7 +115,11 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
           className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-primary),0.2)] data-[state=active]:to-[rgba(var(--color-primary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-primary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-primary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
         >
           <div className="p-1 rounded-md bg-[rgba(var(--color-primary),0.1)] mr-2">
-            <FileCode size={16} className="text-[rgb(var(--color-primary))]" />
+            <FileCode
+              aria-hidden="true"
+              size={16}
+              className="text-[rgb(var(--color-primary))]"
+            />
           </div>
           <span className="font-medium">Files</span>
         </TabsTrigger>
@@ -115,7 +128,11 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
           className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-secondary),0.2)] data-[state=active]:to-[rgba(var(--color-secondary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-secondary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-secondary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
         >
           <div className="p-1 rounded-md bg-[rgba(var(--color-secondary),0.1)] mr-2">
-            <Settings size={16} className="text-[rgb(var(--color-secondary))]" />
+            <Settings
+              aria-hidden="true"
+              size={16}
+              className="text-[rgb(var(--color-secondary))]"
+            />
           </div>
           <span className="font-medium">Options</span>
         </TabsTrigger>
@@ -129,7 +146,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <CardTitle className="text-base font-semibold flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-accent-2))]">
                 <div className="p-1.5 rounded-md bg-[rgba(var(--color-primary),0.1)] border border-[rgba(var(--color-primary),0.2)]">
-                  <FileCode size={18} className="text-[rgb(var(--color-primary))]" />
+                  <FileCode aria-hidden="true" size={18} className="text-[rgb(var(--color-primary))]" />
                 </div>
                 Project Files
               </CardTitle>
@@ -138,10 +155,12 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                 {/* Search with enhanced styling and animation */}
                 <div className="relative group">
                   <Search
+                    aria-hidden="true"
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] group-focus-within:text-[rgb(var(--color-primary))] transition-colors"
                     size={14}
                   />
                   <Input
+                    aria-label="Filter files"
                     placeholder="Filter files…"
                     value={fileSearchTerm}
                     onChange={(e) => setFileSearchTerm(e.target.value)}
@@ -149,17 +168,20 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                   />
                   {fileSearchTerm && (
                     <button
+                      type="button"
+                      aria-label="Clear filter"
                       onClick={() => setFileSearchTerm('')}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text-primary))] transition-colors"
                     >
-                      <XSquare size={14} />
+                      <XSquare aria-hidden="true" size={14} />
                     </button>
                   )}
                   {/* Show wildcard hint if empty */}
                   {!fileSearchTerm && (
-                    <Filter 
-                      size={14} 
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] opacity-50" 
+                    <Filter
+                      aria-hidden="true"
+                      size={14}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] opacity-50"
                       title="Supports wildcards: *.js, src/**, etc."
                     />
                   )}
@@ -175,6 +197,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                     className="h-9 bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-primary),0.1)] hover:border-[rgba(var(--color-primary),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                   >
                     <RefreshCw
+                      aria-hidden="true"
                       size={14}
                       className={cn("mr-1.5", isLoadingTree && "animate-spin text-[rgb(var(--color-primary))]")}
                     />
@@ -189,7 +212,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                       disabled={!projectPath}
                       className="h-9 px-3 rounded-r-none bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-secondary),0.1)] hover:border-[rgba(var(--color-secondary),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                     >
-                      <CheckSquare size={14} className="mr-1.5 text-[rgb(var(--color-secondary))]" />
+                      <CheckSquare aria-hidden="true" size={14} className="mr-1.5 text-[rgb(var(--color-secondary))]" />
                       All
                     </Button>
                     <Button
@@ -199,7 +222,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                       disabled={!selectedFilePaths.length}
                       className="h-9 px-3 rounded-l-none border-l-0 bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-accent-1),0.1)] hover:border-[rgba(var(--color-accent-1),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                     >
-                      <XSquare size={14} className="mr-1.5 text-[rgb(var(--color-accent-1))]" />
+                      <XSquare aria-hidden="true" size={14} className="mr-1.5 text-[rgb(var(--color-accent-1))]" />
                       Clear
                     </Button>
                   </div>
@@ -212,7 +235,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                       disabled={!projectPath}
                       className="h-9 px-3 rounded-r-none bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-accent-2),0.1)] hover:border-[rgba(var(--color-accent-2),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                     >
-                      <ChevronsDown size={14} className="mr-1.5 text-[rgb(var(--color-accent-2))]" />
+                      <ChevronsDown aria-hidden="true" size={14} className="mr-1.5 text-[rgb(var(--color-accent-2))]" />
                       Expand
                     </Button>
                     <Button
@@ -222,7 +245,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                       disabled={!projectPath}
                       className="h-9 px-3 rounded-l-none border-l-0 bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-accent-2),0.1)] hover:border-[rgba(var(--color-accent-2),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                     >
-                      <ChevronsUp size={14} className="mr-1.5 text-[rgb(var(--color-accent-2))]" />
+                      <ChevronsUp aria-hidden="true" size={14} className="mr-1.5 text-[rgb(var(--color-accent-2))]" />
                       Collapse
                     </Button>
                   </div>

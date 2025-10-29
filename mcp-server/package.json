@@ -8,7 +8,7 @@
     "codetoprompt-mcp": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && (chmod +x dist/index.js || true)",
     "watch": "tsc --watch",
     "prepare": "npm run build",
     "inspector": "npx @modelcontextprotocol/inspector dist/index.js"

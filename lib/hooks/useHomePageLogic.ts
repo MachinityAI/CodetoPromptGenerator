@@ -18,6 +18,7 @@ import {
   import { usePromptService } from "@/services/promptServiceHooks";
   import { useExclusionService } from "@/services/exclusionServiceHooks";
   import { useAutoSelectService } from "@/services/autoSelectServiceHooks";
+  import { OPENROUTER_API_KEY_STORAGE_KEY } from "@/lib/constants/storage";
 
   import {
     applyExtensionFilter,
@@ -25,8 +26,6 @@ import {
     flattenTree,
   } from "@/lib/fileFilters";
   import type { FileTreeViewHandle } from "@/views/FileTreeView";
-
-  const LS_KEY_OR = "openrouterApiKey";
 
   export function useHomePageLogic() {
     // --- Global State ---
@@ -79,7 +78,12 @@ import {
     useEffect(() => {
       fetchGlobalExclusions();
       fetchMetaPromptList();
-      const storedKey = localStorage.getItem(LS_KEY_OR) ?? "";
+      let storedKey = "";
+      try {
+        storedKey = localStorage.getItem(OPENROUTER_API_KEY_STORAGE_KEY) ?? "";
+      } catch (error) {
+        console.warn("Failed to read stored API key", error);
+      }
       setApiKeyDraft(storedKey);
       if (storedKey) {
         setOpenrouterApiKey(storedKey);
@@ -161,13 +165,21 @@ import {
       }
     }, [projectPath, loadProjectTree, loadSelectedFileContents]);
 
-    const saveApiKey = useCallback(() => {
+    const saveApiKey = useCallback((persist: boolean = true) => {
       const trimmed = apiKeyDraft.trim();
       if (!trimmed.startsWith("sk-")) {
         setError("API key format looks invalid. It should start with 'sk-'.");
         return;
       }
-      localStorage.setItem(LS_KEY_OR, trimmed);
+      if (persist) {
+        try {
+          localStorage.setItem(OPENROUTER_API_KEY_STORAGE_KEY, trimmed);
+        } catch (error) {
+          console.warn("Failed to persist API key", error);
+          setError("Failed to persist API key. Try again or disable persistence.");
+          return;
+        }
+      }
       setOpenrouterApiKey(trimmed);
       closeSettingsModal(); // Use store action to close
     }, [apiKeyDraft, setOpenrouterApiKey, setError, closeSettingsModal]);

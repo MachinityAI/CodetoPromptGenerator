@@ -103,7 +103,7 @@ Add to your Cursor MCP configuration:
 
 Once configured, you can ask Claude:
 
-```
+```text
 "Use the get_project_structure tool to show me the structure of /path/to/my/project"
 
 "Use smart_file_selection to find the most relevant files for implementing user authentication"
@@ -166,7 +166,7 @@ This will open a web interface where you can test tools and resources.
 
 ## Architecture
 
-```
+```text
 mcp-server/
 ├── src/
 │   ├── index.ts              # Main server entry point
