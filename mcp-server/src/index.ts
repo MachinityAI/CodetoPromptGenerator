@@ -196,19 +196,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     switch (name) {
       case 'get_project_structure':
-        return await getProjectStructure(args as any);
+        return await getProjectStructure(args as Parameters<typeof getProjectStructure>[0]);
 
       case 'smart_file_selection':
-        return await smartFileSelection(args as any);
+        return await smartFileSelection(args as Parameters<typeof smartFileSelection>[0]);
 
       case 'analyze_code_graph':
-        return await analyzeCodeGraph(args as any);
+        return await analyzeCodeGraph(args as Parameters<typeof analyzeCodeGraph>[0]);
 
       case 'search_codebase':
-        return await searchCodebase(args as any);
+        return await searchCodebase(args as Parameters<typeof searchCodebase>[0]);
 
       case 'get_git_context':
-        return await getGitContext(args as any);
+        return await getGitContext(args as Parameters<typeof getGitContext>[0]);
 
       default:
         throw new McpError(

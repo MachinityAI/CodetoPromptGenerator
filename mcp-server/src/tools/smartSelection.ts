@@ -16,6 +16,7 @@ interface SmartSelectionArgs {
   projectPath: string;
   taskDescription: string;
   maxFiles?: number;
+  maxFilesScanned?: number;
 }
 
 /**
@@ -52,6 +53,7 @@ async function getAllFiles(projectPath: string): Promise<string[]> {
     nodir: true,
     dot: false,
     absolute: false,
+    follow: false,
     ignore: [
       '**/node_modules/**',
       '**/.git/**',
@@ -63,7 +65,7 @@ async function getAllFiles(projectPath: string): Promise<string[]> {
   });
 
   // Filter with gitignore
-  return files.filter(file => !ig.ignores(file));
+  return files.filter(file => !ig.ignores(file.replace(/\\/g, '/')));
 }
 
 /**
@@ -182,10 +184,20 @@ export async function smartFileSelection(args: SmartSelectionArgs) {
     }
 
     // Get all files
-    const allFiles = await getAllFiles(projectPath);
+    const discoveredFiles = await getAllFiles(projectPath);
+    const filesToScore = (() => {
+      if (
+        typeof args.maxFilesScanned === 'number' &&
+        args.maxFilesScanned > 0 &&
+        discoveredFiles.length > args.maxFilesScanned
+      ) {
+        return discoveredFiles.slice(0, args.maxFilesScanned);
+      }
+      return discoveredFiles;
+    })();
 
     // Score files
-    const scoredFiles = allFiles
+    const scoredFiles = filesToScore
       .map(file => ({
         path: file,
         score: scoreFileRelevance(file, trimmedTask)
@@ -218,7 +230,8 @@ export async function smartFileSelection(args: SmartSelectionArgs) {
               taskDescription: trimmedTask,
               selectedFiles,
               summary: {
-                totalScanned: allFiles.length,
+                totalScanned: filesToScore.length,
+                totalDiscovered: discoveredFiles.length,
                 selectedCount: selectedFiles.length,
                 totalSize: selectedFiles.reduce((sum, f) => sum + f.size, 0)
               }

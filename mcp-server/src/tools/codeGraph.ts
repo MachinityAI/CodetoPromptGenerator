@@ -209,6 +209,7 @@ function buildDependencyGraph(
   const nodes = new Map<string, { id: string; label: string; type: string }>();
   const analysisByPath = new Map<string, FileAnalysis>();
   const edges: { from: string; to: string; type: string }[] = [];
+  const edgeKeys = new Set<string>();
 
   // Create nodes for all files
   for (const analysis of analyses) {
@@ -242,11 +243,15 @@ function buildDependencyGraph(
 
         if (resolvedPath) {
           const target = analysisByPath.get(path.resolve(resolvedPath))!;
-          edges.push({
-            from: analysis.path,
-            to: target.path,
-            type: 'import'
-          });
+          const key = `${analysis.path}->${target.path}`;
+          if (!edgeKeys.has(key)) {
+            edgeKeys.add(key);
+            edges.push({
+              from: analysis.path,
+              to: target.path,
+              type: 'import'
+            });
+          }
         }
       } else if (includeExternal) {
         // External dependency
@@ -257,11 +262,15 @@ function buildDependencyGraph(
             type: 'external'
           });
         }
-        edges.push({
-          from: analysis.path,
-          to: imp.source,
-          type: 'import'
-        });
+        const key = `${analysis.path}->${imp.source}`;
+        if (!edgeKeys.has(key)) {
+          edgeKeys.add(key);
+          edges.push({
+            from: analysis.path,
+            to: imp.source,
+            type: 'import'
+          });
+        }
       }
     }
   }
@@ -280,9 +289,16 @@ export async function analyzeCodeGraph(args: CodeGraphArgs) {
 
   try {
     // Analyze all files
-    const analyses = await Promise.all(
+    const settled = await Promise.allSettled(
       files.map(file => analyzeFile(file))
     );
+    const analyses = settled
+      .filter((result): result is PromiseFulfilledResult<Awaited<ReturnType<typeof analyzeFile>>> => result.status === 'fulfilled')
+      .map(result => result.value);
+
+    if (analyses.length === 0) {
+      throw new Error('No files could be analyzed');
+    }
 
     // Build dependency graph
     const graph = buildDependencyGraph(analyses, includeExternalDeps);
