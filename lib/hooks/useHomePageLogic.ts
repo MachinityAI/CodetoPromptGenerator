@@ -12,15 +12,13 @@ import {
   import { useProjectStore } from "@/stores/useProjectStore";
   import { usePromptStore } from "@/stores/usePromptStore";
   import { useExclusionStore } from "@/stores/useExclusionStore";
-  import { useTodoStore } from "@/stores/useTodoStore";
   import { useSettingsStore } from "@/stores/useSettingStore";
 
   import { useProjectService } from "@/services/projectServiceHooks";
   import { usePromptService } from "@/services/promptServiceHooks";
   import { useExclusionService } from "@/services/exclusionServiceHooks";
-  import { useTodoService } from "@/services/todoServiceHooks";
   import { useAutoSelectService } from "@/services/autoSelectServiceHooks";
-  import { useActorWizardService } from "@/services/actorWizardServiceHooks";
+  import { OPENROUTER_API_KEY_STORAGE_KEY } from "@/lib/constants/storage";
 
   import {
     applyExtensionFilter,
@@ -28,8 +26,6 @@ import {
     flattenTree,
   } from "@/lib/fileFilters";
   import type { FileTreeViewHandle } from "@/views/FileTreeView";
-
-  const LS_KEY_OR = "openrouterApiKey";
 
   export function useHomePageLogic() {
     // --- Global State ---
@@ -57,20 +53,17 @@ import {
     const localExclusions = useExclusionStore((s) => s.localExclusions);
     const extensionFilters = useExclusionStore((s) => s.extensionFilters);
 
-    const todos = useTodoStore((s) => s.todos);
     const setOpenrouterApiKey = useSettingsStore((s) => s.setOpenrouterApiKey);
 
     // --- Services ---
     const { loadProjectTree, loadSelectedFileContents } = useProjectService();
     const { fetchMetaPromptList } = usePromptService();
     const { fetchGlobalExclusions, fetchLocalExclusions } = useExclusionService();
-    const { loadTodos } = useTodoService();
     const { autoSelect, isSelecting } = useAutoSelectService();
-    const { generateActors, isGenerating } = useActorWizardService();
 
     // --- Refs & Local UI State ---
     const treeRef = useRef<FileTreeViewHandle>(null);
-    const [activeTab, setActiveTab] = useState<"files" | "options" | "tasks" | "actors">( 
+    const [activeTab, setActiveTab] = useState<"files" | "options">(
       "files",
     );
     // showSettings and setShowSettings are removed, managed by useAppStore
@@ -85,7 +78,12 @@ import {
     useEffect(() => {
       fetchGlobalExclusions();
       fetchMetaPromptList();
-      const storedKey = localStorage.getItem(LS_KEY_OR) ?? "";
+      let storedKey = "";
+      try {
+        storedKey = localStorage.getItem(OPENROUTER_API_KEY_STORAGE_KEY) ?? "";
+      } catch (error) {
+        console.warn("Failed to read stored API key", error);
+      }
       setApiKeyDraft(storedKey);
       if (storedKey) {
         setOpenrouterApiKey(storedKey);
@@ -95,7 +93,6 @@ import {
     useEffect(() => {
       if (projectPath) {
         loadProjectTree();
-        loadTodos();
         fetchLocalExclusions();
       } else {
         useProjectStore.setState({
@@ -103,10 +100,9 @@ import {
           selectedFilePaths: [],
           filesData: [],
         });
-        useTodoStore.setState({ todos: [] });
         useExclusionStore.setState({ localExclusions: [] });
       }
-    }, [projectPath, loadProjectTree, loadTodos, fetchLocalExclusions]);
+    }, [projectPath, loadProjectTree, fetchLocalExclusions]);
 
     useEffect(() => {
       if (projectPath && selectedFilePaths.length) {
@@ -143,7 +139,8 @@ import {
 
     const hasContent = useMemo(
       () =>
-        metaPrompt.trim() || mainInstructions.trim() || selectedFileCount > 0,
+        Boolean(metaPrompt.trim() || mainInstructions.trim()) ||
+        selectedFileCount > 0,
       [metaPrompt, mainInstructions, selectedFileCount],
     );
 
@@ -168,13 +165,21 @@ import {
       }
     }, [projectPath, loadProjectTree, loadSelectedFileContents]);
 
-    const saveApiKey = useCallback(() => {
+    const saveApiKey = useCallback((persist: boolean = true) => {
       const trimmed = apiKeyDraft.trim();
       if (!trimmed.startsWith("sk-")) {
         setError("API key format looks invalid. It should start with 'sk-'.");
         return;
       }
-      localStorage.setItem(LS_KEY_OR, trimmed);
+      if (persist) {
+        try {
+          localStorage.setItem(OPENROUTER_API_KEY_STORAGE_KEY, trimmed);
+        } catch (error) {
+          console.warn("Failed to persist API key", error);
+          setError("Failed to persist API key. Try again or disable persistence.");
+          return;
+        }
+      }
       setOpenrouterApiKey(trimmed);
       closeSettingsModal(); // Use store action to close
     }, [apiKeyDraft, setOpenrouterApiKey, setError, closeSettingsModal]);
@@ -192,11 +197,10 @@ import {
       isLoadingTree,
       isSelecting,
       activeTab,
-      filteredTree, 
+      filteredTree,
       selectedFilePaths,
       fileSearchTerm,
-      localExclusions, 
-      todos, 
+      localExclusions,
       hasContent,
       selectedFileCount,
       totalTokens,
@@ -205,8 +209,6 @@ import {
       // Setters & Handlers
       handlePathSelected,
       autoSelect,
-      generateActors,
-      isGeneratingActors: isGenerating,
       openSettingsModal, // Expose store action
       saveApiKey,
       setApiKeyDraft,
@@ -218,6 +220,6 @@ import {
       setSelectedFilePaths,
       // Refs
       treeRef,
-      fileTree, 
+      fileTree,
     };
   }

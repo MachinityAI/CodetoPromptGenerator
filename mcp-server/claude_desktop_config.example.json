@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "codetoprompt": {
+      "command": "node",
+      "args": [
+        "/REPLACE_WITH_ABSOLUTE_PATH/CodetoPromptGenerator/mcp-server/dist/index.js"
+      ]
+    }
+  }
+}

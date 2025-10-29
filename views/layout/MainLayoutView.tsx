@@ -7,8 +7,8 @@ import type { FileTreeViewHandle } from "@/views/FileTreeView";
 
 interface MainLayoutViewProps {
   // Props needed for Left Panel
-  activeTab: "files" | "options" | "tasks";
-  setActiveTab: (tab: "files" | "options" | "tasks") => void;
+  activeTab: "files" | "options";
+  setActiveTab: (tab: "files" | "options") => void;
   projectPath: string;
   isLoadingTree: boolean;
   fileSearchTerm: string;

@@ -16,7 +16,7 @@ import { KeyRound, PlusCircle } from "lucide-react";
 interface SettingsModalViewProps {
   apiKeyDraft: string;
   setApiKeyDraft: (key: string) => void;
-  saveApiKey: () => void; // This function from useHomePageLogic will handle saving and then closing the modal.
+  saveApiKey: (persist?: boolean) => void; // This function from useHomePageLogic will handle saving and then closing the modal.
 }
 
 const SettingsModalView: React.FC<SettingsModalViewProps> = ({

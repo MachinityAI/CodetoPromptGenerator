@@ -3,7 +3,6 @@ import React, { useMemo } from "react";
 import {
   FileCode,
   Settings,
-  ListChecks,
   Search,
   RefreshCw,
   CheckSquare,
@@ -11,11 +10,7 @@ import {
   ChevronsDown,
   ChevronsUp,
   LayoutGrid,
-  ClipboardList, // New icon for Kanban
-  Layers,
   Filter,
-  BookOpen, // New icon for User Stories
-  Users, // NEW icon for Actors
 } from "lucide-react";
 import {
   Tabs,
@@ -39,10 +34,6 @@ import SelectedFilesListView from "@/views/SelectedFilesListView";
 import RefinedSelectionGroupsView from "@/views/RefinedSelectionGroupsView";
 import RefinedExclusionsManagerView from "@/views/RefinedExclusionsManagerView";
 import RefinedLocalExclusionsManagerView from "@/views/RefinedLocalExclusionsManagerView";
-import KanbanBoardView from "@/views/KanbanBoardView";
-import TodoListView from "@/views/TodoListView";
-import UserStoryListView from "@/views/UserStoryListView";
-import ActorListView from "@/views/ActorListView"; // Import the new ActorListView
 
 import {
   applyWildcardFilter,
@@ -51,9 +42,14 @@ import {
 } from "@/lib/fileFilters";
 import type { FileNode } from "@/types";
 
+type LeftPanelTab = "files" | "options";
+
+const isLeftPanelTab = (value: string): value is LeftPanelTab =>
+  value === "files" || value === "options";
+
 interface LeftPanelViewProps {
-  activeTab: "files" | "options" | "tasks" | "actors"; // ADDED "actors"
-  setActiveTab: (tab: "files" | "options" | "tasks" | "actors") => void; // ADDED "actors"
+  activeTab: LeftPanelTab;
+  setActiveTab: (tab: LeftPanelTab) => void;
   projectPath: string;
   isLoadingTree: boolean;
   fileSearchTerm: string;
@@ -105,46 +101,40 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
   return (
     <Tabs
       value={activeTab}
-      onValueChange={(v) => setActiveTab(v as any)}
+      onValueChange={(value) => {
+        if (isLeftPanelTab(value)) {
+          setActiveTab(value);
+        }
+      }}
       className="space-y-6"
     >
       {/* Enhanced Tab Navigation with dynamic glows */}
-      <TabsList className="grid grid-cols-4 p-1.5 bg-[rgba(var(--color-bg-secondary),0.7)] backdrop-blur-xl border border-[rgba(var(--color-border),0.5)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-        <TabsTrigger 
-          value="files" 
+      <TabsList className="grid grid-cols-2 p-1.5 bg-[rgba(var(--color-bg-secondary),0.7)] backdrop-blur-xl border border-[rgba(var(--color-border),0.5)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+        <TabsTrigger
+          value="files"
           className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-primary),0.2)] data-[state=active]:to-[rgba(var(--color-primary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-primary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-primary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
         >
           <div className="p-1 rounded-md bg-[rgba(var(--color-primary),0.1)] mr-2">
-            <FileCode size={16} className="text-[rgb(var(--color-primary))]" />
+            <FileCode
+              aria-hidden="true"
+              size={16}
+              className="text-[rgb(var(--color-primary))]"
+            />
           </div>
           <span className="font-medium">Files</span>
         </TabsTrigger>
-        <TabsTrigger 
+        <TabsTrigger
           value="options"
           className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-secondary),0.2)] data-[state=active]:to-[rgba(var(--color-secondary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-secondary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-secondary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
         >
           <div className="p-1 rounded-md bg-[rgba(var(--color-secondary),0.1)] mr-2">
-            <Settings size={16} className="text-[rgb(var(--color-secondary))]" />
+            <Settings
+              aria-hidden="true"
+              size={16}
+              className="text-[rgb(var(--color-secondary))]"
+            />
           </div>
           <span className="font-medium">Options</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="tasks"
-          className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-tertiary),0.2)] data-[state=active]:to-[rgba(var(--color-tertiary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-tertiary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-tertiary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
-        >
-          <div className="p-1 rounded-md bg-[rgba(var(--color-tertiary),0.1)] mr-2">
-            <ListChecks size={16} className="text-[rgb(var(--color-tertiary))]" />
-          </div>
-          <span className="font-medium">Tasks</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="actors" // NEW Tab
-          className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-accent-2),0.2)] data-[state=active]:to-[rgba(var(--color-accent-2),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-accent-2),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-accent-2),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
-        >
-          <div className="p-1 rounded-md bg-[rgba(var(--color-accent-2),0.1)] mr-2">
-            <Users size={16} className="text-[rgb(var(--color-accent-2))]" />
-          </div>
-          <span className="font-medium">Actors</span>
         </TabsTrigger>
       </TabsList>
 
@@ -156,7 +146,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <CardTitle className="text-base font-semibold flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-accent-2))]">
                 <div className="p-1.5 rounded-md bg-[rgba(var(--color-primary),0.1)] border border-[rgba(var(--color-primary),0.2)]">
-                  <FileCode size={18} className="text-[rgb(var(--color-primary))]" />
+                  <FileCode aria-hidden="true" size={18} className="text-[rgb(var(--color-primary))]" />
                 </div>
                 Project Files
               </CardTitle>
@@ -165,10 +155,12 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                 {/* Search with enhanced styling and animation */}
                 <div className="relative group">
                   <Search
+                    aria-hidden="true"
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] group-focus-within:text-[rgb(var(--color-primary))] transition-colors"
                     size={14}
                   />
                   <Input
+                    aria-label="Filter files"
                     placeholder="Filter files…"
                     value={fileSearchTerm}
                     onChange={(e) => setFileSearchTerm(e.target.value)}
@@ -176,17 +168,20 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                   />
                   {fileSearchTerm && (
                     <button
+                      type="button"
+                      aria-label="Clear filter"
                       onClick={() => setFileSearchTerm('')}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text-primary))] transition-colors"
                     >
-                      <XSquare size={14} />
+                      <XSquare aria-hidden="true" size={14} />
                     </button>
                   )}
                   {/* Show wildcard hint if empty */}
                   {!fileSearchTerm && (
-                    <Filter 
-                      size={14} 
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] opacity-50" 
+                    <Filter
+                      aria-hidden="true"
+                      size={14}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] opacity-50"
                       title="Supports wildcards: *.js, src/**, etc."
                     />
                   )}
@@ -202,6 +197,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                     className="h-9 bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-primary),0.1)] hover:border-[rgba(var(--color-primary),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                   >
                     <RefreshCw
+                      aria-hidden="true"
                       size={14}
                       className={cn("mr-1.5", isLoadingTree && "animate-spin text-[rgb(var(--color-primary))]")}
                     />
@@ -216,7 +212,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                       disabled={!projectPath}
                       className="h-9 px-3 rounded-r-none bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-secondary),0.1)] hover:border-[rgba(var(--color-secondary),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                     >
-                      <CheckSquare size={14} className="mr-1.5 text-[rgb(var(--color-secondary))]" />
+                      <CheckSquare aria-hidden="true" size={14} className="mr-1.5 text-[rgb(var(--color-secondary))]" />
                       All
                     </Button>
                     <Button
@@ -226,7 +222,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                       disabled={!selectedFilePaths.length}
                       className="h-9 px-3 rounded-l-none border-l-0 bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-accent-1),0.1)] hover:border-[rgba(var(--color-accent-1),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                     >
-                      <XSquare size={14} className="mr-1.5 text-[rgb(var(--color-accent-1))]" />
+                      <XSquare aria-hidden="true" size={14} className="mr-1.5 text-[rgb(var(--color-accent-1))]" />
                       Clear
                     </Button>
                   </div>
@@ -239,7 +235,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                       disabled={!projectPath}
                       className="h-9 px-3 rounded-r-none bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-accent-2),0.1)] hover:border-[rgba(var(--color-accent-2),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                     >
-                      <ChevronsDown size={14} className="mr-1.5 text-[rgb(var(--color-accent-2))]" />
+                      <ChevronsDown aria-hidden="true" size={14} className="mr-1.5 text-[rgb(var(--color-accent-2))]" />
                       Expand
                     </Button>
                     <Button
@@ -249,7 +245,7 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
                       disabled={!projectPath}
                       className="h-9 px-3 rounded-l-none border-l-0 bg-[rgba(var(--color-bg-secondary),0.7)] border-[rgba(var(--color-border),0.7)] hover:bg-[rgba(var(--color-accent-2),0.1)] hover:border-[rgba(var(--color-accent-2),0.5)] text-[rgb(var(--color-text-secondary))] transition-all"
                     >
-                      <ChevronsUp size={14} className="mr-1.5 text-[rgb(var(--color-accent-2))]" />
+                      <ChevronsUp aria-hidden="true" size={14} className="mr-1.5 text-[rgb(var(--color-accent-2))]" />
                       Collapse
                     </Button>
                   </div>
@@ -336,57 +332,6 @@ const LeftPanelView: React.FC<LeftPanelViewProps> = ({
       <TabsContent value="options" className="mt-6 space-y-8 animate-fade-in">
         <RefinedExclusionsManagerView />
         {projectPath && <RefinedLocalExclusionsManagerView />}
-      </TabsContent>
-
-      {/* TASKS TAB */}
-      {/* Nested Tabs for Kanban and User Stories */}
-      <TabsContent value="tasks" className="mt-6 h-full flex flex-col animate-fade-in">
-        {projectPath ? (
-          <Tabs defaultValue="kanban-board" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-2 p-1.5 bg-[rgba(var(--color-bg-secondary),0.7)] backdrop-blur-xl border border-[rgba(var(--color-border),0.5)] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] mb-4">
-              <TabsTrigger 
-                value="kanban-board" 
-                className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-primary),0.2)] data-[state=active]:to-[rgba(var(--color-primary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-primary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-primary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
-              >
-                <div className="p-1 rounded-md bg-[rgba(var(--color-primary),0.1)] mr-2">
-                  <ClipboardList size={16} className="text-[rgb(var(--color-primary))]" />
-                </div>
-                <span className="font-medium">Kanban Board</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="user-stories" 
-                className="rounded-lg py-2.5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[rgba(var(--color-tertiary),0.2)] data-[state=active]:to-[rgba(var(--color-tertiary),0.05)] data-[state=active]:backdrop-blur-xl data-[state=active]:border data-[state=active]:border-[rgba(var(--color-tertiary),0.3)] data-[state=active]:shadow-[0_0_15px_rgba(var(--color-tertiary),0.2)] data-[state=active]:scale-[1.02] transition-all duration-300"
-              >
-                <div className="p-1 rounded-md bg-[rgba(var(--color-tertiary),0.1)] mr-2">
-                  <BookOpen size={16} className="text-[rgb(var(--color-tertiary))]" />
-                </div>
-                <span className="font-medium">User Stories</span>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="kanban-board" className="flex-1 pt-0 mt-0">
-              <KanbanBoardView />
-            </TabsContent>
-            <TabsContent value="user-stories" className="flex-1 pt-0 mt-0">
-              <UserStoryListView />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          // Moved to a common 'no project selected' message within the nested tabs
-          <div className="p-16 border border-dashed border-[rgba(var(--color-border),0.5)] rounded-xl bg-[rgba(var(--color-bg-secondary),0.3)] backdrop-blur-sm text-center flex flex-col items-center text-[rgb(var(--color-text-muted))] h-full justify-center">
-            <div className="w-16 h-16 rounded-full bg-[rgba(var(--color-bg-tertiary),0.7)] flex items-center justify-center mb-4 border border-[rgba(var(--color-border),0.3)]">
-              <Layers size={36} className="opacity-40 text-[rgb(var(--color-text-muted))]" />
-            </div>
-            <p className="text-lg font-medium mb-2 text-[rgb(var(--color-text-secondary))]">No Project Selected</p>
-            <p className="max-w-md text-sm">Select a project using the folder picker at the top to manage your tasks and user stories.</p>
-          </div>
-          
-        )}
-      </TabsContent>
-
-      {/* ACTORS TAB (NEW) */}
-      <TabsContent value="actors" className="mt-6 h-full flex flex-col animate-fade-in">
-        <ActorListView />
       </TabsContent>
     </Tabs>
   );
