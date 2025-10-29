@@ -4,11 +4,10 @@
  * Provides git-related context: commits, diffs, changed files, etc.
  */
 
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
-import * as path from 'path';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface GitContextArgs {
   projectPath: string;
@@ -38,10 +37,11 @@ interface GitStatus {
  */
 async function gitCommand(
   cwd: string,
-  command: string
+  args: string[],
+  maxBuffer = 10 * 1024 * 1024
 ): Promise<string> {
   try {
-    const { stdout } = await execAsync(`git ${command}`, { cwd });
+    const { stdout } = await execFileAsync('git', args, { cwd, maxBuffer });
     return stdout.trim();
   } catch (error) {
     throw new Error(`Git command failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -53,7 +53,7 @@ async function gitCommand(
  */
 async function isGitRepo(projectPath: string): Promise<boolean> {
   try {
-    await gitCommand(projectPath, 'rev-parse --git-dir');
+    await gitCommand(projectPath, ['rev-parse', '--git-dir']);
     return true;
   } catch {
     return false;
@@ -67,23 +67,23 @@ async function getRecentCommits(
   projectPath: string,
   count: number
 ): Promise<GitCommit[]> {
-  const format = '%H%n%an%n%ai%n%s%n---COMMIT---';
+  const format = '%H%x1f%an%x1f%ai%x1f%s%x1e';
   const output = await gitCommand(
     projectPath,
-    `log -${count} --pretty=format:"${format}"`
+    ['log', `-${count}`, `--pretty=format:${format}`]
   );
 
   const commits: GitCommit[] = [];
-  const commitBlocks = output.split('---COMMIT---').filter(b => b.trim());
+  const entries = output.split('\x1e').filter(Boolean);
 
-  for (const block of commitBlocks) {
-    const lines = block.trim().split('\n');
-    if (lines.length >= 4) {
+  for (const entry of entries) {
+    const [hash, author, date, message] = entry.split('\x1f');
+    if (hash && author && date && message) {
       commits.push({
-        hash: lines[0],
-        author: lines[1],
-        date: lines[2],
-        message: lines[3]
+        hash,
+        author,
+        date,
+        message: message.trim()
       });
     }
   }
@@ -96,7 +96,7 @@ async function getRecentCommits(
  */
 async function getGitStatus(projectPath: string): Promise<GitStatus> {
   // Get branch name
-  const branch = await gitCommand(projectPath, 'rev-parse --abbrev-ref HEAD');
+  const branch = await gitCommand(projectPath, ['rev-parse', '--abbrev-ref', 'HEAD']);
 
   // Get ahead/behind count
   let ahead = 0;
@@ -104,7 +104,7 @@ async function getGitStatus(projectPath: string): Promise<GitStatus> {
   try {
     const counts = await gitCommand(
       projectPath,
-      'rev-list --left-right --count HEAD...@{upstream}'
+      ['rev-list', '--left-right', '--count', 'HEAD...@{upstream}']
     );
     const parts = counts.split('\t');
     if (parts.length === 2) {
@@ -116,7 +116,7 @@ async function getGitStatus(projectPath: string): Promise<GitStatus> {
   }
 
   // Get status
-  const statusOutput = await gitCommand(projectPath, 'status --porcelain');
+  const statusOutput = await gitCommand(projectPath, ['status', '--porcelain']);
   const statusLines = statusOutput.split('\n').filter(l => l.trim());
 
   const modified: string[] = [];
@@ -156,8 +156,8 @@ async function getGitStatus(projectPath: string): Promise<GitStatus> {
 async function getGitDiff(projectPath: string): Promise<string> {
   try {
     // Get diff of staged and unstaged changes
-    const stagedDiff = await gitCommand(projectPath, 'diff --cached');
-    const unstagedDiff = await gitCommand(projectPath, 'diff');
+    const stagedDiff = await gitCommand(projectPath, ['diff', '--cached']);
+    const unstagedDiff = await gitCommand(projectPath, ['diff']);
 
     return `# Staged Changes\n${stagedDiff}\n\n# Unstaged Changes\n${unstagedDiff}`;
   } catch {
@@ -175,7 +175,7 @@ async function getChangedFiles(
   try {
     const output = await gitCommand(
       projectPath,
-      `diff --numstat HEAD~${commitCount}..HEAD`
+      ['diff', '--numstat', `HEAD~${commitCount}..HEAD`]
     );
 
     const lines = output.split('\n').filter(l => l.trim());
@@ -209,6 +209,11 @@ export async function getGitContext(args: GitContextArgs) {
     commitCount = 10
   } = args;
 
+  const MAX_COMMIT_COUNT = 100;
+  const safeCommitCount = Number.isInteger(commitCount)
+    ? Math.min(Math.max(commitCount, 1), MAX_COMMIT_COUNT)
+    : 10;
+
   try {
     // Check if it's a git repository
     if (!(await isGitRepo(projectPath))) {
@@ -216,9 +221,9 @@ export async function getGitContext(args: GitContextArgs) {
     }
 
     // Get git information
-    const commits = await getRecentCommits(projectPath, commitCount);
+    const commits = await getRecentCommits(projectPath, safeCommitCount);
     const status = await getGitStatus(projectPath);
-    const changedFiles = await getChangedFiles(projectPath, commitCount);
+    const changedFiles = await getChangedFiles(projectPath, safeCommitCount);
     const diff = includeDiff ? await getGitDiff(projectPath) : '';
 
     return {

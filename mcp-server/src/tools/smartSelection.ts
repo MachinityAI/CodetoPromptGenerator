@@ -51,7 +51,15 @@ async function getAllFiles(projectPath: string): Promise<string[]> {
     cwd: projectPath,
     nodir: true,
     dot: false,
-    absolute: false
+    absolute: false,
+    ignore: [
+      '**/node_modules/**',
+      '**/.git/**',
+      '**/.next/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/__pycache__/**'
+    ]
   });
 
   // Filter with gitignore
@@ -115,13 +123,14 @@ function scoreFileRelevance(
   }
 
   // Prefer source files
-  const ext = path.extname(filePath);
+  const ext = path.extname(filePath).toLowerCase();
   if (['.ts', '.tsx', '.js', '.jsx', '.py', '.go', '.rs'].includes(ext)) {
     score += 5;
   }
 
   // Prefer files in common source directories
-  if (fileLower.includes('/src/') || fileLower.startsWith('src/')) {
+  const normalizedPath = fileLower.replace(/\\/g, '/');
+  if (normalizedPath.includes('/src/') || normalizedPath.startsWith('src/')) {
     score += 3;
   }
 
@@ -135,6 +144,43 @@ export async function smartFileSelection(args: SmartSelectionArgs) {
   const { projectPath, taskDescription, maxFiles = 20 } = args;
 
   try {
+    if (!projectPath) {
+      throw new Error('projectPath is required');
+    }
+
+    if (!path.isAbsolute(projectPath)) {
+      throw new Error('projectPath must be an absolute path');
+    }
+
+    const stats = await fs.stat(projectPath);
+    if (!stats.isDirectory()) {
+      throw new Error('projectPath must be a directory');
+    }
+
+    if (!Number.isInteger(maxFiles) || maxFiles <= 0) {
+      throw new Error('maxFiles must be a positive integer');
+    }
+
+    const trimmedTask = taskDescription?.trim();
+    if (!trimmedTask) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                taskDescription: trimmedTask,
+                selectedFiles: [],
+                summary: { totalScanned: 0, selectedCount: 0, totalSize: 0 }
+              },
+              null,
+              2
+            )
+          }
+        ]
+      };
+    }
+
     // Get all files
     const allFiles = await getAllFiles(projectPath);
 
@@ -142,7 +188,7 @@ export async function smartFileSelection(args: SmartSelectionArgs) {
     const scoredFiles = allFiles
       .map(file => ({
         path: file,
-        score: scoreFileRelevance(file, taskDescription)
+        score: scoreFileRelevance(file, trimmedTask)
       }))
       .filter(item => item.score > 0) // Only include files with positive score
       .sort((a, b) => b.score - a.score)
@@ -169,7 +215,7 @@ export async function smartFileSelection(args: SmartSelectionArgs) {
           type: 'text',
           text: JSON.stringify(
             {
-              taskDescription,
+              taskDescription: trimmedTask,
               selectedFiles,
               summary: {
                 totalScanned: allFiles.length,

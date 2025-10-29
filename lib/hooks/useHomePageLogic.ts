@@ -135,7 +135,8 @@ import {
 
     const hasContent = useMemo(
       () =>
-        metaPrompt.trim() || mainInstructions.trim() || selectedFileCount > 0,
+        Boolean(metaPrompt.trim() || mainInstructions.trim()) ||
+        selectedFileCount > 0,
       [metaPrompt, mainInstructions, selectedFileCount],
     );
 

@@ -28,7 +28,7 @@ export function useRefactoredHomePageLogic() {
 
   // Combine hasContent logic with file count
   const hasContent = useMemo(
-    () => uiState.hasContent || projectLogic.selectedFileCount > 0,
+    () => Boolean(uiState.hasContent) || projectLogic.selectedFileCount > 0,
     [uiState.hasContent, projectLogic.selectedFileCount],
   );
 

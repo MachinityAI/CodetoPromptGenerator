@@ -1,8 +1,6 @@
 // types/index.ts
 
 // Shared / re‑exported project types – EXTENDED with Codemap + Auto‑select models.
-import { z } from 'zod';
-
 export interface FileNode {
   name: string;
   relativePath: string;

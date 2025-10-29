@@ -62,10 +62,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             path: {
               type: 'string',
+              minLength: 1,
               description: 'Absolute path to the project directory'
             },
             maxDepth: {
-              type: 'number',
+              type: 'integer',
+              minimum: -1,
               description: 'Maximum depth to traverse (default: unlimited)',
               default: -1
             },
@@ -86,6 +88,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             projectPath: {
               type: 'string',
+              minLength: 1,
               description: 'Absolute path to the project directory'
             },
             taskDescription: {
@@ -93,7 +96,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: 'Description of the task or feature you want to work on'
             },
             maxFiles: {
-              type: 'number',
+              type: 'integer',
+              minimum: 1,
               description: 'Maximum number of files to select (default: 20)',
               default: 20
             }
@@ -129,6 +133,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             projectPath: {
               type: 'string',
+              minLength: 1,
               description: 'Absolute path to the project directory'
             },
             query: {
@@ -157,6 +162,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             projectPath: {
               type: 'string',
+              minLength: 1,
               description: 'Absolute path to the project directory'
             },
             includeDiff: {
@@ -165,7 +171,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               default: true
             },
             commitCount: {
-              type: 'number',
+              type: 'integer',
+              minimum: 1,
+              maximum: 100,
               description: 'Number of recent commits to include (default: 10)',
               default: 10
             }

@@ -27,6 +27,21 @@ interface SearchResult {
   context: string;
 }
 
+function isRegexSafe(pattern: string, maxLength = 200): boolean {
+  if (pattern.length === 0 || pattern.length > maxLength) {
+    return false;
+  }
+
+  const dangerous = [
+    /(\(.*\+.*\))\+/, // (a+)+
+    /(\(.*\*.*\))\*/, // (a*)*
+    /(\(.*\+.*\))\*/, // (a+)*
+    /(\(.*\*.*\))\+/ // (a*)+
+  ];
+
+  return !dangerous.some((regex) => regex.test(pattern));
+}
+
 /**
  * Get files matching pattern
  */
@@ -77,13 +92,25 @@ async function searchInFile(
     const content = await fs.readFile(filePath, 'utf-8');
     const lines = content.split('\n');
 
-    const regex = searchType === 'regex'
-      ? new RegExp(query, 'gi')
-      : new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    let regex: RegExp;
+    if (searchType === 'regex') {
+      if (!isRegexSafe(query)) {
+        throw new Error('Potentially unsafe regex pattern detected');
+      }
+      try {
+        regex = new RegExp(query, 'gi');
+      } catch (error) {
+        throw new Error(`Invalid regex pattern: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    } else {
+      regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    }
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       let match;
+
+      regex.lastIndex = 0;
 
       while ((match = regex.exec(line)) !== null) {
         // Get context (2 lines before and after)
@@ -119,6 +146,23 @@ export async function searchCodebase(args: SearchArgs) {
   } = args;
 
   try {
+    if (!projectPath) {
+      throw new Error('projectPath is required');
+    }
+
+    if (!path.isAbsolute(projectPath)) {
+      throw new Error('projectPath must be an absolute path');
+    }
+
+    const stats = await fs.stat(projectPath);
+    if (!stats.isDirectory()) {
+      throw new Error('projectPath must be a directory');
+    }
+
+    if (!query || !query.trim()) {
+      throw new Error('query is required');
+    }
+
     // Get files to search
     const files = await getMatchingFiles(projectPath, filePattern);
 
@@ -135,7 +179,7 @@ export async function searchCodebase(args: SearchArgs) {
       allResults = fileResults.flat();
     } else if (searchType === 'semantic') {
       // Semantic search would require embeddings
-      // For now, fall back to text search
+      // TODO: Implement embeddings-backed semantic search
       const searchPromises = files.map(file =>
         searchInFile(file, query, 'text')
       );

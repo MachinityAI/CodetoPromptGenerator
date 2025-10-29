@@ -207,6 +207,7 @@ function buildDependencyGraph(
   edges: { from: string; to: string; type: string }[];
 } {
   const nodes = new Map<string, { id: string; label: string; type: string }>();
+  const analysisByPath = new Map<string, FileAnalysis>();
   const edges: { from: string; to: string; type: string }[] = [];
 
   // Create nodes for all files
@@ -217,6 +218,7 @@ function buildDependencyGraph(
       label: fileName,
       type: 'file'
     });
+    analysisByPath.set(path.resolve(analysis.path), analysis);
   }
 
   // Create edges based on imports
@@ -227,14 +229,22 @@ function buildDependencyGraph(
 
       if (isRelative) {
         // Try to resolve the import to a file in our analysis
-        const resolved = analyses.find(a =>
-          a.path.includes(imp.source.replace(/^\.\//, '').replace(/\.js$/, ''))
-        );
+        const fromDir = path.dirname(analysis.path);
+        const basePath = path.resolve(fromDir, imp.source);
+        const candidates = [
+          basePath,
+          `${basePath}.ts`, `${basePath}.tsx`, `${basePath}.js`, `${basePath}.jsx`, `${basePath}.mjs`, `${basePath}.cjs`,
+          path.join(basePath, 'index.ts'), path.join(basePath, 'index.tsx'),
+          path.join(basePath, 'index.js'), path.join(basePath, 'index.jsx')
+        ];
 
-        if (resolved) {
+        const resolvedPath = candidates.find(candidate => analysisByPath.has(path.resolve(candidate)));
+
+        if (resolvedPath) {
+          const target = analysisByPath.get(path.resolve(resolvedPath))!;
           edges.push({
             from: analysis.path,
-            to: resolved.path,
+            to: target.path,
             type: 'import'
           });
         }

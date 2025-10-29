@@ -91,9 +91,18 @@ async function buildFileTree(
     }
 
     const entryFullPath = path.join(dirPath, name);
-    const stats = await fs.stat(entryFullPath);
+    let stats;
+    try {
+      stats = await fs.lstat(entryFullPath);
+    } catch {
+      continue;
+    }
 
-    if (entry.isDirectory()) {
+    if (stats.isSymbolicLink()) {
+      continue;
+    }
+
+    if (stats.isDirectory()) {
       const children = await buildFileTree(
         entryFullPath,
         entryRelativePath,
@@ -110,7 +119,7 @@ async function buildFileTree(
         children,
         modified: stats.mtime.toISOString()
       });
-    } else if (entry.isFile()) {
+    } else if (stats.isFile()) {
       nodes.push({
         name,
         path: entryRelativePath,
@@ -139,6 +148,18 @@ export async function getProjectStructure(args: ProjectStructureArgs) {
   const { path: projectPath, maxDepth = -1, includeHidden = false } = args;
 
   try {
+    if (!path.isAbsolute(projectPath)) {
+      throw new Error('Path must be absolute');
+    }
+
+    if (!Number.isInteger(maxDepth) || maxDepth < -1) {
+      throw new Error('maxDepth must be -1 (unlimited) or an integer >= 0');
+    }
+
+    if (typeof includeHidden !== 'boolean') {
+      throw new Error('includeHidden must be a boolean');
+    }
+
     // Verify path exists
     const stats = await fs.stat(projectPath);
     if (!stats.isDirectory()) {

@@ -204,7 +204,7 @@ mcp-server/
 ## Future Enhancements
 
 - [ ] Semantic code search with embeddings
-- [ ] Context caching for faster repeated requests
+- [ ] Enhanced caching strategies (Redis, disk persistence)
 - [ ] Incremental updates (only send changed files)
 - [ ] More language support (Go, Rust, Java, etc.)
 - [ ] AST-based refactoring suggestions

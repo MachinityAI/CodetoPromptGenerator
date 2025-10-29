@@ -24,7 +24,7 @@ export function useUIState() {
 
   // Derived UI state
   const hasContent = useMemo(
-    () => metaPrompt.trim() || mainInstructions.trim(),
+    () => Boolean(metaPrompt.trim() || mainInstructions.trim()),
     [metaPrompt, mainInstructions],
   );
 
