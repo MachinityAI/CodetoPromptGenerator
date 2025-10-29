@@ -27,6 +27,8 @@ interface SearchResult {
   context: string;
 }
 
+const FILE_SEARCH_CONCURRENCY = 64;
+
 function isRegexSafe(pattern: string, maxLength = 200): boolean {
   if (pattern.length === 0 || pattern.length > maxLength) {
     return false;
@@ -134,6 +136,20 @@ async function searchInFile(
   return results;
 }
 
+async function searchFilesWithConcurrency(
+  files: string[],
+  iterator: (file: string) => Promise<SearchResult[]>,
+  concurrency = FILE_SEARCH_CONCURRENCY
+): Promise<SearchResult[]> {
+  const aggregated: SearchResult[] = [];
+  for (let i = 0; i < files.length; i += concurrency) {
+    const chunk = files.slice(i, i + concurrency);
+    const chunkResults = await Promise.all(chunk.map(iterator));
+    aggregated.push(...chunkResults.flat());
+  }
+  return aggregated;
+}
+
 /**
  * Search codebase
  */
@@ -170,22 +186,15 @@ export async function searchCodebase(args: SearchArgs) {
     let allResults: SearchResult[] = [];
 
     if (searchType === 'text' || searchType === 'regex') {
-      // Search in each file
-      const searchPromises = files.map(file =>
+      allResults = await searchFilesWithConcurrency(files, (file) =>
         searchInFile(file, query, searchType)
       );
-
-      const fileResults = await Promise.all(searchPromises);
-      allResults = fileResults.flat();
     } else if (searchType === 'semantic') {
       // Semantic search would require embeddings
       // TODO: Implement embeddings-backed semantic search
-      const searchPromises = files.map(file =>
+      allResults = await searchFilesWithConcurrency(files, (file) =>
         searchInFile(file, query, 'text')
       );
-
-      const fileResults = await Promise.all(searchPromises);
-      allResults = fileResults.flat();
     }
 
     // Make file paths relative

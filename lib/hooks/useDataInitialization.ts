@@ -5,8 +5,7 @@ import { useExclusionService } from "@/services/exclusionServiceHooks";
 import { useSettingsStore } from "@/stores/useSettingStore";
 import { useProjectStore } from "@/stores/useProjectStore";
 import { useExclusionStore } from "@/stores/useExclusionStore";
-
-const LS_KEY_OR = "openrouterApiKey";
+import { OPENROUTER_API_KEY_STORAGE_KEY } from "@/lib/constants/storage";
 
 /**
  * Hook for managing initial data loading and client-side initialization
@@ -31,7 +30,13 @@ export function useDataInitialization() {
   useEffect(() => {
     fetchGlobalExclusions();
     fetchMetaPromptList();
-    const storedKey = localStorage.getItem(LS_KEY_OR) ?? "";
+
+    let storedKey = "";
+    try {
+      storedKey = localStorage.getItem(OPENROUTER_API_KEY_STORAGE_KEY) ?? "";
+    } catch (error) {
+      console.warn("Failed to read stored API key", error);
+    }
     setApiKeyDraft(storedKey);
     if (storedKey) {
       setOpenrouterApiKey(storedKey);
